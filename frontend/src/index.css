@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  @apply bg-gray-50 dark:bg-gray-900;
+}
+
+@theme {
+  --color-primary: #f97316;
+  --color-secondary: #333333;
+}
