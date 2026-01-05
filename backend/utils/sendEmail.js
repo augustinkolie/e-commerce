@@ -9,7 +9,7 @@ const sendEmail = async (options) => {
         console.log(`Subject: ${options.subject}`);
         console.log(`Message: \n${options.message}`);
         console.log('----------------------------------------------------');
-        return; // Early return to simulate success
+        return Promise.resolve(); // Return resolved promise to simulate success
     }
 
     const transporterOptions = {

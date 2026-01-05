@@ -44,7 +44,7 @@ const ForgotPassword = () => {
                     style={{ backgroundImage: "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200')" }}
                 />
                 {/* Gradient Overlay - Orange to Purple */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#ff6b35]/90 via-[#9370db]/80 to-[#6a5acd]/90" />
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
 
                 {/* Content */}
                 <div className="relative z-10 flex flex-col justify-center items-center px-24 text-white text-center w-full">

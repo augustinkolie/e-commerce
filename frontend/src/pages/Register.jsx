@@ -42,7 +42,7 @@ const Register = () => {
                     className="absolute inset-0 bg-cover bg-center"
                     style={{ backgroundImage: "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200')" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-br from-[#4169e1]/90 via-[#9370db]/80 to-[#ff6b6b]/90" />
+                <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
                 <div className="relative z-10 flex flex-col justify-center items-center px-24 text-white text-center w-full">
                     <Link to="/" className="mb-8 hidden lg:block">
                         <img src={logo} alt="KolieShop" className="h-[180px] w-auto object-contain brightness-0 invert" />

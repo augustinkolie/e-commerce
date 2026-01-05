@@ -9,6 +9,7 @@ const notificationRoutes = require('./routes/notificationRoutes.js');
 const messageRoutes = require('./routes/messageRoutes.js');
 const dashboardRoutes = require('./routes/dashboardRoutes.js');
 const uploadRoutes = require('./routes/uploadRoutes.js');
+// const chatRoutes = require('./routes/chatRoutes.js'); // Temporarily disabled
 const path = require('path');
 const fs = require('fs');
 
@@ -29,6 +30,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/upload', uploadRoutes);
+// app.use('/api/chat', chatRoutes); // Temporarily disabled
 
 // Create upload directory if it doesn't exist
 const uploadDir = path.join(__dirname, 'uploads', 'profiles');
