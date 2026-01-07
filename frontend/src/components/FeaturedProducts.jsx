@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { Star, Heart, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { useAnimation } from '../context/AnimationContext';
 
 const FeaturedProducts = ({ products = [], loading = false }) => {
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
-
+    const { triggerFlyToCart } = useAnimation();
     // Use the first 10 products as featured (fill wider grid)
     const featuredProducts = products.slice(0, 10);
 
@@ -91,7 +92,12 @@ const FeaturedProducts = ({ products = [], loading = false }) => {
                                         {product.price.toLocaleString('fr-FR')} {product.currency || '€'}
                                     </span>
                                     <button
-                                        onClick={() => addToCart(product)}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            triggerFlyToCart(rect, product.image);
+                                            addToCart(product);
+                                        }}
                                         className="bg-primary text-white p-2 rounded-lg hover:bg-orange-600 transition-all active:scale-95 shadow-md shadow-primary/20 cursor-pointer flex-shrink-0"
                                     >
                                         <ShoppingCart size={18} />

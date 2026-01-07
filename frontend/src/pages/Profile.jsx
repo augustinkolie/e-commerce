@@ -34,6 +34,8 @@ const Profile = () => {
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [saveError, setSaveError] = useState(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [orders, setOrders] = useState([]);
+    const [loadingOrders, setLoadingOrders] = useState(false);
 
     useEffect(() => {
         if (location.state?.activeTab) {
@@ -50,6 +52,23 @@ const Profile = () => {
             setCity(user.city || '');
         }
     }, [user]);
+
+    useEffect(() => {
+        if (activeTab === 'orders' || activeTab === 'dashboard') {
+            const fetchOrders = async () => {
+                try {
+                    setLoadingOrders(true);
+                    const { data } = await api.get('/orders/myorders');
+                    setOrders(data);
+                } catch (error) {
+                    console.error("Erreur chargement commandes:", error);
+                } finally {
+                    setLoadingOrders(false);
+                }
+            };
+            fetchOrders();
+        }
+    }, [activeTab]);
 
     const handleSave = async () => {
         setSaving(true);
@@ -211,13 +230,6 @@ const Profile = () => {
         { id: 'orders', label: 'Mes Commandes', icon: Package },
         { id: 'favorites', label: 'Mes Favoris', icon: Heart },
         { id: 'settings', label: 'Paramètres', icon: Settings },
-    ];
-
-    // Mock Data for Orders
-    const mockOrders = [
-        { id: '#ORD-7352', date: '21 Oct 2024', total: '145.00 €', status: 'Livré', items: 3 },
-        { id: '#ORD-7351', date: '15 Oct 2024', total: '89.90 €', status: 'En cours', items: 1 },
-        { id: '#ORD-7350', date: '02 Oct 2024', total: '210.50 €', status: 'Annulé', items: 4 },
     ];
 
     const renderContent = () => {
@@ -386,7 +398,7 @@ const Profile = () => {
                                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600 dark:text-blue-400">
                                         <Package size={24} />
                                     </div>
-                                    <span className="text-2xl font-bold text-gray-900 dark:text-white">12</span>
+                                    <span className="text-2xl font-bold text-gray-900 dark:text-white">{orders.length}</span>
                                 </div>
                                 <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Commandes</p>
                             </div>
@@ -429,21 +441,31 @@ const Profile = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                        {mockOrders.map((order) => (
-                                            <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                                <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{order.id}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{order.date}</td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                        ${order.status === 'Livré' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                                            order.status === 'En cours' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                                                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
-                                                        {order.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white text-right">{order.total}</td>
+                                        {loadingOrders ? (
+                                            <tr>
+                                                <td colSpan="4" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Chargement des commandes...</td>
                                             </tr>
-                                        ))}
+                                        ) : orders.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="4" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Aucune commande récente.</td>
+                                            </tr>
+                                        ) : (
+                                            orders.slice(0, 5).map((order) => (
+                                                <tr key={order._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">#{order._id.substring(20, 24).toUpperCase()}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                            ${order.status === 'Livré' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                                                order.status === 'En cours' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
+                                                            {order.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white text-right">{order.totalPrice} €</td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -470,25 +492,35 @@ const Profile = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                        {mockOrders.map((order) => (
-                                            <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                                <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{order.id}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{order.date}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{order.items} articles</td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                        ${order.status === 'Livré' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                                            order.status === 'En cours' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                                                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
-                                                        {order.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white text-right">{order.total}</td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <button className="text-primary hover:text-orange-600 text-sm font-medium">Détails</button>
-                                                </td>
+                                        {loadingOrders ? (
+                                            <tr>
+                                                <td colSpan="6" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Chargement des commandes...</td>
                                             </tr>
-                                        ))}
+                                        ) : orders.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="6" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Aucune commande trouvée.</td>
+                                            </tr>
+                                        ) : (
+                                            orders.map((order) => (
+                                                <tr key={order._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">#{order._id.substring(20, 24).toUpperCase()}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{order.orderItems.length} articles</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                            ${order.status === 'Livré' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                                                order.status === 'En cours' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
+                                                            {order.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white text-right">{order.totalPrice} €</td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <button className="text-primary hover:text-orange-600 text-sm font-medium">Détails</button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

@@ -16,11 +16,13 @@ import ReviewSection from '../components/ReviewSection';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
 import api from '../utils/api';
+import { useAnimation } from '../context/AnimationContext';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
+    const { triggerFlyToCart } = useAnimation();
 
     const [product, setProduct] = useState(null);
     const [similarProducts, setSimilarProducts] = useState([]);
@@ -253,7 +255,13 @@ const ProductDetail = () => {
                             {/* Action Buttons */}
                             <div className="flex flex-col sm:flex-row gap-4 mb-8">
                                 <button
-                                    onClick={() => addToCart({ ...product, quantity })}
+                                    onClick={(e) => {
+                                        const rect = e.currentTarget.getBoundingClientRect();
+                                        // Use the first image for the animation
+                                        const animationImage = (product.images && product.images.length > 0) ? product.images[0] : product.image;
+                                        triggerFlyToCart(rect, animationImage);
+                                        addToCart({ ...product, quantity });
+                                    }}
                                     className="flex-1 bg-primary hover:bg-orange-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg shadow-orange-500/25 cursor-pointer"
                                 >
                                     <ShoppingCart size={20} />

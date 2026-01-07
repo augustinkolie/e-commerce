@@ -7,12 +7,14 @@ import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import logo from '../assets/kolieshop (2).png';
+import { useAnimation } from '../context/AnimationContext';
 
 const Header = () => {
     const { theme, toggleTheme } = useTheme();
     const { getCartCount } = useCart();
     const { getFavoritesCount } = useFavorites();
     const { user, logout } = useAuth();
+    const { registerCartIcon } = useAnimation();
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -157,14 +159,16 @@ const Header = () => {
                     </Link>
 
                     {/* Cart */}
-                    <Link to="/cart" className="relative cursor-pointer group">
-                        <ShoppingCart size={26} className={iconClasses} />
-                        {getCartCount() > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-gray-900">
-                                {getCartCount()}
-                            </span>
-                        )}
-                    </Link>
+                    <div ref={registerCartIcon} className="relative">
+                        <Link to="/cart" className="relative cursor-pointer group">
+                            <ShoppingCart size={26} className={iconClasses} />
+                            {getCartCount() > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-gray-900">
+                                    {getCartCount()}
+                                </span>
+                            )}
+                        </Link>
+                    </div>
 
                     {/* Admin Dashboard Link */}
                     {user && user.isAdmin && (

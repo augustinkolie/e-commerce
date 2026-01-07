@@ -155,7 +155,7 @@ const Hero = () => {
       </div>
 
       {/* Pagination Dots */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex space-x-4 z-20">
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex space-x-4 z-20">
         {slides.map((_, index) => (
           <button
             key={index}
@@ -167,7 +167,7 @@ const Hero = () => {
       </div>
 
       {/* Animated Scroll Indicator */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 animate-bounce opacity-50 hover:opacity-100 transition-opacity">
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce opacity-50 hover:opacity-100 transition-opacity">
         <ChevronDown size={32} className="text-white drop-shadow-lg" />
       </div>
 

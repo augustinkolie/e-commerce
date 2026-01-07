@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { Star, ShoppingCart } from 'lucide-react';
 import api from '../utils/api';
 import { useCart } from '../context/CartContext';
+import { useAnimation } from '../context/AnimationContext';
 
 const NewArrivals = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const { addToCart } = useCart();
+    const { triggerFlyToCart } = useAnimation();
 
     useEffect(() => {
         const fetchNewArrivals = async () => {
@@ -82,7 +84,13 @@ const NewArrivals = () => {
                                         </div>
                                     </div>
                                     <button
-                                        onClick={() => addToCart(product)}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            const img = (product.images && product.images.length > 0) ? product.images[0] : product.image;
+                                            triggerFlyToCart(rect, img);
+                                            addToCart(product);
+                                        }}
                                         className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-900 dark:text-white hover:bg-primary hover:text-white transition-all transform active:scale-95 shadow-sm hover:shadow-lg hover:shadow-orange-500/30"
                                     >
                                         <ShoppingCart size={18} />

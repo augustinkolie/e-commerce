@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Star, ShoppingCart, Heart, Eye, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { useAnimation } from '../context/AnimationContext';
 import { Link } from 'react-router-dom';
 
 const CountdownBox = ({ value, label }) => (
@@ -22,6 +23,7 @@ const FlashDeals = ({ products = [], loading = false }) => {
     ].filter(Boolean);
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
+    const { triggerFlyToCart } = useAnimation();
     const [timeLeft, setTimeLeft] = useState({
         hours: 23,
         minutes: 20,
@@ -153,7 +155,12 @@ const FlashDeals = ({ products = [], loading = false }) => {
                                     </div>
 
                                     <button
-                                        onClick={() => addToCart(product)}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            triggerFlyToCart(rect, product.image);
+                                            addToCart(product);
+                                        }}
                                         className="w-full bg-primary text-white py-2.5 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:bg-orange-600 transition-all active:scale-95 shadow-lg shadow-primary/20 cursor-pointer text-sm"
                                     >
                                         <ShoppingCart size={18} />

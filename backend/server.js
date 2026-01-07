@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userRoutes.js');
 const subscriberRoutes = require('./routes/subscriberRoutes.js');
 const notificationRoutes = require('./routes/notificationRoutes.js');
 const messageRoutes = require('./routes/messageRoutes.js');
+const orderRoutes = require('./routes/orderRoutes.js');
 const dashboardRoutes = require('./routes/dashboardRoutes.js');
 const uploadRoutes = require('./routes/uploadRoutes.js');
 // const chatRoutes = require('./routes/chatRoutes.js'); // Temporarily disabled
@@ -28,6 +29,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/upload', uploadRoutes);
 // app.use('/api/chat', chatRoutes); // Temporarily disabled

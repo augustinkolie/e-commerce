@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Star, ShoppingCart, Eye, Heart, Filter } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { useAnimation } from '../context/AnimationContext';
 import api from '../utils/api';
 
 const categories = [
@@ -20,6 +21,7 @@ const categories = [
 const Category = () => {
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
+    const { triggerFlyToCart } = useAnimation();
     const location = useLocation();
 
     const [products, setProducts] = useState([]);
@@ -235,12 +237,13 @@ const Category = () => {
                                 >
                                     {/* Image */}
                                     <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700">
-                                        <img
-                                            src={product.image}
-                                            alt={product.name}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
-
+                                        <Link to={`/product/${product._id}`} className="block w-full h-full">
+                                            <img
+                                                src={product.image}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                            />
+                                        </Link>
                                         {/* Hover Actions */}
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                             <Link
@@ -313,7 +316,12 @@ const Category = () => {
 
                                         {/* Add to Cart Button */}
                                         <button
-                                            onClick={() => addToCart(product)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                triggerFlyToCart(rect, product.image);
+                                                addToCart(product);
+                                            }}
                                             className="w-full bg-primary hover:bg-orange-600 text-white py-2.5 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer text-sm"
                                         >
                                             <ShoppingCart size={18} />

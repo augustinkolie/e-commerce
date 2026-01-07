@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
+import { AuthProvider } from './context/AuthContext';
+import { AnimationProvider } from './context/AnimationContext';
+import FlyToCartLayer from './components/FlyToCartLayer';
 import MainLayout from './components/MainLayout';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -38,59 +41,64 @@ import StockScreen from './pages/admin/StockScreen';
 import SettingsScreen from './pages/admin/SettingsScreen';
 
 
-import { AuthProvider } from './context/AuthContext';
-
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <CartProvider>
         <FavoritesProvider>
-          <CartProvider>
-            <Router>
-              <Routes>
-                <Route element={<MainLayout />}>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/favorites" element={<Favorites />} />
-                  <Route path="/category" element={<Category />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/deals" element={<Deals />} />
-                  <Route path="/new-arrivals" element={<NewArrivals />} />
-                  <Route path="/best-sellers" element={<BestSellers />} />
-                  <Route path="/seller" element={<Seller />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                </Route>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/new-password" element={<NewPassword />} />
-
-                {/* Admin Routes */}
-                <Route element={<AdminRoute />}>
-                  <Route path="/admin" element={<AdminLayout />}>
-                    <Route path="dashboard" element={<DashboardScreen />} />
-                    <Route path="userlist" element={<UserListScreen />} />
-                    <Route path="productlist" element={<ProductListScreen />} />
-                    <Route path="product/:id/edit" element={<ProductEditScreen />} />
-                    <Route path="orderlist" element={<OrderListScreen />} />
-                    <Route path="reviewlist" element={<ReviewListScreen />} />
-                    <Route path="statistics" element={<StatisticsScreen />} />
-                    <Route path="stock" element={<StockScreen />} />
-                    <Route path="settings" element={<SettingsScreen />} />
+          <AnimationProvider>
+            <ThemeProvider>
+              <Router>
+                <FlyToCartLayer />
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<MainLayout />}>
+                    <Route index element={<Home />} />
+                    <Route path="/category" element={<Category />} />
+                    <Route path="/category/:categoryName" element={<Category />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/favorites" element={<Favorites />} />
+                    <Route path="/deals" element={<Deals />} />
+                    <Route path="/new-arrivals" element={<NewArrivals />} />
+                    <Route path="/best-sellers" element={<BestSellers />} />
+                    <Route path="/seller" element={<Seller />} />
+                    <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/messages" element={<Messages />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
                   </Route>
-                </Route>
-              </Routes>
-            </Router>
-          </CartProvider>
+
+                  {/* Auth Routes */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/new-password" element={<NewPassword />} />
+
+                  {/* Admin Routes */}
+                  <Route element={<AdminRoute />}>
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route path="dashboard" element={<DashboardScreen />} />
+                      <Route path="userlist" element={<UserListScreen />} />
+                      <Route path="productlist" element={<ProductListScreen />} />
+                      <Route path="product/:id/edit" element={<ProductEditScreen />} />
+                      <Route path="orderlist" element={<OrderListScreen />} />
+                      <Route path="reviewlist" element={<ReviewListScreen />} />
+                      <Route path="statistics" element={<StatisticsScreen />} />
+                      <Route path="stock" element={<StockScreen />} />
+                      <Route path="settings" element={<SettingsScreen />} />
+                    </Route>
+                  </Route>
+                </Routes>
+              </Router>
+            </ThemeProvider>
+          </AnimationProvider>
         </FavoritesProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 export default App;

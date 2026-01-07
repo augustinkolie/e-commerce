@@ -11,13 +11,34 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 const Checkout = () => {
-    const { cartItems, getCartTotal } = useCart();
+    const { cartItems, getCartTotal, clearCart } = useCart();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [step, setStep] = useState(1); // 1: Shipping, 2: Payment, 3: Success
     const [selectedPayment, setSelectedPayment] = useState('card');
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const [shippingAddress, setShippingAddress] = useState({
+        address: user?.address || '',
+        city: user?.city || '',
+        postalCode: user?.postalCode || '',
+        country: 'Guinée',
+        phone: user?.phone || '',
+        firstName: user?.name?.split(' ')[0] || '',
+        lastName: user?.name?.split(' ').slice(1).join(' ') || ''
+    });
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setShippingAddress(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     const subtotal = getCartTotal();
     const shipping = subtotal > 50 ? 0 : 5.99;
@@ -30,13 +51,37 @@ const Checkout = () => {
         { id: 'paypal', name: 'PayPal', icon: ShieldCheck, color: 'bg-blue-800' },
     ];
 
-    const handleProcessPayment = () => {
+    const handleProcessPayment = async () => {
         setIsProcessing(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsProcessing(false);
+
+        try {
+            const orderData = {
+                orderItems: cartItems.map(item => ({
+                    name: item.name,
+                    qty: item.quantity,
+                    image: item.image,
+                    price: item.price,
+                    product: item._id,
+                    currency: item.currency || '€'
+                })),
+                shippingAddress,
+                paymentMethod: selectedPayment,
+                itemsPrice: subtotal,
+                taxPrice: 0, // Simplified
+                shippingPrice: shipping,
+                totalPrice: total,
+            };
+
+            await api.post('/orders', orderData);
+
+            clearCart();
             setStep(3);
-        }, 2000);
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.message || 'Erreur lors de la commande');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     if (cartItems.length === 0 && step !== 3) {
@@ -78,26 +123,66 @@ const Checkout = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Prénom</label>
-                                        <input type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                                        <input
+                                            type="text"
+                                            name="firstName"
+                                            value={shippingAddress.firstName}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Nom</label>
-                                        <input type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                                        <input
+                                            type="text"
+                                            name="lastName"
+                                            value={shippingAddress.lastName}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Adresse complète</label>
-                                    <input type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={shippingAddress.address}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Ville</label>
-                                        <input type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                                        <input
+                                            type="text"
+                                            name="city"
+                                            value={shippingAddress.city}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Téléphone</label>
-                                        <input type="tel" className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            value={shippingAddress.phone}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        />
                                     </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Code Postal</label>
+                                    <input
+                                        type="text"
+                                        name="postalCode"
+                                        value={shippingAddress.postalCode}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    />
                                 </div>
                                 <button
                                     type="button"
