@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Check, Trash2, MessageCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { Bell, Check, Trash2, MessageCircle, ExternalLink, Loader2, Package, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { format } from 'date-fns';
@@ -92,14 +92,14 @@ const Notifications = () => {
                         <div
                             key={notification._id}
                             className={`p-6 rounded-2xl border transition-all ${notification.read
-                                    ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 opacity-75'
-                                    : 'bg-primary/5 dark:bg-primary/10 border-primary/20 shadow-sm'
+                                ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 opacity-75'
+                                : 'bg-primary/5 dark:bg-primary/10 border-primary/20 shadow-sm'
                                 }`}
                         >
                             <div className="flex gap-4">
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${notification.read ? 'bg-gray-100 dark:bg-gray-700 text-gray-400' : 'bg-primary text-white shadow-lg shadow-primary/20'
                                     }`}>
-                                    <MessageCircle size={24} />
+                                    {notification.type === 'NEW_PRODUCT' ? <Package size={24} /> : <MessageCircle size={24} />}
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-start justify-between gap-4">
@@ -126,7 +126,7 @@ const Notifications = () => {
                                             to={`/product/${notification.product}`}
                                             className="text-sm font-bold text-primary hover:underline flex items-center gap-1.5"
                                         >
-                                            Voir le commentaire
+                                            {notification.type === 'NEW_PRODUCT' ? 'Voir le produit' : 'Voir le commentaire'}
                                             <ExternalLink size={14} />
                                         </Link>
                                     </div>

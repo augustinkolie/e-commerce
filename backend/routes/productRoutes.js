@@ -11,10 +11,17 @@ const {
     likeProductReview,
     replyToProductReview,
     likeProductReviewReply,
+    getAllReviews,
+    deleteReview,
 } = require('../controllers/productController.js');
 const { protect, admin } = require('../middleware/authMiddleware.js');
 
 router.route('/').get(getProducts).post(protect, admin, createProduct);
+
+// Global review routes (Admin only)
+router.route('/reviews').get(protect, admin, getAllReviews);
+router.route('/reviews/:id').delete(protect, admin, deleteReview);
+
 router
     .route('/:id')
     .get(getProductById)

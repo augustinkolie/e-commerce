@@ -227,7 +227,7 @@ const Category = () => {
                         </div>
 
                         {/* Products Grid */}
-                        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isSidebarOpen ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>
+                        <div className={`grid grid-cols-2 sm:grid-cols-3 ${isSidebarOpen ? 'lg:grid-cols-4' : 'lg:grid-cols-5'} gap-4 md:gap-6`}>
                             {filteredProducts.map((product) => (
                                 <div
                                     key={product._id}
@@ -283,38 +283,41 @@ const Category = () => {
                                     </div>
 
                                     {/* Info */}
-                                    <div className="p-5">
-                                        <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-2 line-clamp-2 leading-snug">
+                                    <div className="p-4">
+                                        <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-2 line-clamp-2 leading-tight">
                                             {product.name}
                                         </h3>
 
                                         {/* Rating */}
                                         <div className="flex items-center space-x-2 mb-3">
-                                            <div className="flex">
+                                            <div className="flex text-yellow-400">
                                                 {[...Array(5)].map((_, i) => (
                                                     <Star
                                                         key={i}
-                                                        size={14}
-                                                        className={i < product.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                                                        size={12}
+                                                        fill={i < product.rating ? "currentColor" : "none"}
+                                                        className={i < product.rating ? "" : "text-gray-200"}
                                                     />
                                                 ))}
                                             </div>
-                                            <span className="text-xs text-gray-400 dark:text-gray-500">({product.reviews})</span>
+                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">({product.reviews})</span>
                                         </div>
 
                                         {/* Price */}
                                         <div className="flex items-baseline space-x-2 mb-4">
-                                            <span className="text-xl font-bold text-primary">{product.price}€</span>
-                                            <span className="text-sm text-gray-400 line-through">{product.originalPrice}€</span>
+                                            <span className="text-lg font-bold text-primary">{product.price.toLocaleString('fr-FR')} {product.currency || '€'}</span>
+                                            {product.originalPrice && (
+                                                <span className="text-xs text-gray-400 line-through">{product.originalPrice.toLocaleString('fr-FR')} {product.currency || '€'}</span>
+                                            )}
                                         </div>
 
                                         {/* Add to Cart Button */}
                                         <button
                                             onClick={() => addToCart(product)}
-                                            className="w-full bg-primary hover:bg-orange-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+                                            className="w-full bg-primary hover:bg-orange-600 text-white py-2.5 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer text-sm"
                                         >
                                             <ShoppingCart size={18} />
-                                            <span>Ajouter au Panier</span>
+                                            <span>Ajouter</span>
                                         </button>
                                     </div>
                                 </div>

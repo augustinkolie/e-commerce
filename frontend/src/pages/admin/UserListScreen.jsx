@@ -39,10 +39,7 @@ const UserListScreen = () => {
     if (loading) return <div className="p-8 text-center">Chargement...</div>;
 
     return (
-        <div>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Utilisateurs</h1>
-            </div>
+        <div className="pt-2">
 
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700">
                 <div className="overflow-x-auto">

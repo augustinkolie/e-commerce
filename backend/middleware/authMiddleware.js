@@ -23,8 +23,11 @@ const protect = asyncHandler(async (req, res, next) => {
 
             next();
         } catch (error) {
-            console.error(error);
+            console.error('JWT Verification Error:', error.message);
             res.status(401);
+            if (error.name === 'TokenExpiredError') {
+                throw new Error('Votre session a expiré, veuillez vous reconnecter.');
+            }
             throw new Error('Not authorized, token failed');
         }
     }

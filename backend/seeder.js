@@ -5,6 +5,7 @@ const users = require('./data/users.js');
 const products = require('./data/products.js');
 const User = require('./models/User.js');
 const Product = require('./models/Product.js');
+const Review = require('./models/Review.js');
 const connectDB = require('./config/db.js');
 
 dotenv.config();
@@ -15,6 +16,7 @@ const importData = async () => {
     try {
         await Product.deleteMany();
         await User.deleteMany();
+        await Review.deleteMany();
 
         // await User.insertMany(users); // insertMany doesn't trigger pre-save hooks
         const createdUsers = [];
@@ -42,6 +44,7 @@ const destroyData = async () => {
     try {
         await Product.deleteMany();
         await User.deleteMany();
+        await Review.deleteMany();
 
         console.log('Data Destroyed!'.red.inverse);
         process.exit();

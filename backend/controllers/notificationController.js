@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Notification = require('../models/Notification.js');
+const User = require('../models/User.js');
+const Product = require('../models/Product.js');
 
 // @desc    Get user notifications
 // @route   GET /api/notifications
@@ -50,9 +52,42 @@ const markAllAsRead = asyncHandler(async (req, res) => {
     res.json({ message: 'Toutes les notifications marquées comme lues' });
 });
 
+// @desc    Broadcast new product notification to all users
+// @route   POST /api/notifications/broadcast
+// @access  Private/Admin
+const broadcastProductNotification = asyncHandler(async (req, res) => {
+    // Find the latest product
+    const latestProduct = await Product.findOne().sort({ createdAt: -1 });
+
+    if (!latestProduct) {
+        res.status(404);
+        throw new Error('Aucun produit trouvé à notifier');
+    }
+
+    // Find all non-admin users (or all users)
+    const users = await User.find({ isAdmin: false });
+
+    // Create notifications for everyone
+    const notifications = users.map(user => ({
+        user: user._id,
+        type: 'NEW_PRODUCT',
+        message: `Nouveauté ! Découvrez notre nouveau produit : ${latestProduct.name}`,
+        product: latestProduct._id,
+        read: false
+    }));
+
+    await Notification.insertMany(notifications);
+
+    res.status(201).json({
+        message: `Notification envoyée à ${users.length} clients`,
+        productName: latestProduct.name
+    });
+});
+
 module.exports = {
     getNotifications,
     getUnreadCount,
     markAsRead,
     markAllAsRead,
+    broadcastProductNotification,
 };

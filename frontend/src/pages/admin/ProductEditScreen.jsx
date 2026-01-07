@@ -14,9 +14,18 @@ const ProductEditScreen = () => {
     const [category, setCategory] = useState('');
     const [countInStock, setCountInStock] = useState(0);
     const [description, setDescription] = useState('');
+    const [currency, setCurrency] = useState('€');
 
     const [loading, setLoading] = useState(true);
     const [loadingUpdate, setLoadingUpdate] = useState(false);
+
+    // Taux de change (Valeurs approximatives actuelles)
+    const EXCHANGE_RATES = {
+        'GNF': 9300,
+        '$': 1.08,
+        '€': 1,
+        'Fonctionnel': 1
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -29,6 +38,7 @@ const ProductEditScreen = () => {
                 setCategory(data.category);
                 setCountInStock(data.countInStock);
                 setDescription(data.description);
+                setCurrency(data.currency || '€');
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching product details", error);
@@ -51,6 +61,7 @@ const ProductEditScreen = () => {
                 category,
                 description,
                 countInStock,
+                currency,
             });
             setLoadingUpdate(false);
             navigate('/admin/productlist');
@@ -86,14 +97,38 @@ const ProductEditScreen = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prix (€)</label>
-                            <input
-                                type="number"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                                placeholder="0.00"
-                            />
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prix et Devise</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="number"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    placeholder="0.00"
+                                />
+                                <select
+                                    value={currency}
+                                    onChange={(e) => {
+                                        const newCurrency = e.target.value;
+                                        const oldCurrency = currency;
+
+                                        // Convert price based on ratio between rates
+                                        if (price > 0) {
+                                            const conversionFactor = EXCHANGE_RATES[newCurrency] / EXCHANGE_RATES[oldCurrency];
+                                            const newPrice = price * conversionFactor;
+                                            setPrice(Number(newPrice.toFixed(2)));
+                                        }
+
+                                        setCurrency(newCurrency);
+                                    }}
+                                    className="w-32 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all cursor-pointer"
+                                >
+                                    <option value="GNF">GNF</option>
+                                    <option value="$">$ (USD)</option>
+                                    <option value="€">€ (EUR)</option>
+                                    <option value="Fonctionnel">Fonctionnel</option>
+                                </select>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stock</label>

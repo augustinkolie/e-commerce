@@ -8,8 +8,8 @@ const FeaturedProducts = ({ products = [], loading = false }) => {
     const { addToCart } = useCart();
     const { toggleFavorite, isFavorite } = useFavorites();
 
-    // Use the first 8 products as featured
-    const featuredProducts = products.slice(0, 8);
+    // Use the first 10 products as featured (fill wider grid)
+    const featuredProducts = products.slice(0, 10);
 
     if (loading) {
         return <div className="py-20 text-center">Chargement des produits en vedette...</div>;
@@ -25,7 +25,7 @@ const FeaturedProducts = ({ products = [], loading = false }) => {
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
                     {featuredProducts.map((product) => (
                         <Link
                             key={product._id}
@@ -67,32 +67,34 @@ const FeaturedProducts = ({ products = [], loading = false }) => {
                             </div>
 
                             {/* Info Container */}
-                            <div className="p-6 flex flex-col flex-grow">
-                                <h3 className={`text-base font-semibold mb-3 line-clamp-2 leading-snug ${product.showHoverIcons ? 'text-primary' : 'text-gray-800 dark:text-white'}`}>
+                            <div className="p-4 flex flex-col flex-grow">
+                                <h3 className={`text-sm font-semibold mb-2 line-clamp-2 leading-tight ${product.showHoverIcons ? 'text-primary' : 'text-gray-800 dark:text-white'}`}>
                                     {product.name}
                                 </h3>
 
-                                <div className="flex items-center space-x-2 mb-4">
+                                <div className="flex items-center space-x-2 mb-3">
                                     <div className="flex text-yellow-400">
                                         {[...Array(5)].map((_, i) => (
                                             <Star
                                                 key={i}
-                                                size={14}
+                                                size={12}
                                                 fill={i < product.rating ? "currentColor" : "none"}
                                                 className={i < product.rating ? "" : "text-gray-200"}
                                             />
                                         ))}
                                     </div>
-                                    <span className="text-xs text-gray-400 font-medium font-sans">({product.reviews})</span>
+                                    <span className="text-[10px] text-gray-400 font-medium font-sans">({product.reviews})</span>
                                 </div>
 
-                                <div className="mt-auto flex items-center justify-between">
-                                    <span className="text-xl font-bold text-gray-800 dark:text-white">{product.price}€</span>
+                                <div className="mt-auto flex items-center justify-between gap-2">
+                                    <span className="text-lg font-bold text-gray-800 dark:text-white whitespace-nowrap">
+                                        {product.price.toLocaleString('fr-FR')} {product.currency || '€'}
+                                    </span>
                                     <button
                                         onClick={() => addToCart(product)}
-                                        className="bg-primary text-white p-2.5 rounded-lg hover:bg-orange-600 transition-all active:scale-95 shadow-md shadow-primary/20 cursor-pointer"
+                                        className="bg-primary text-white p-2 rounded-lg hover:bg-orange-600 transition-all active:scale-95 shadow-md shadow-primary/20 cursor-pointer flex-shrink-0"
                                     >
-                                        <ShoppingCart size={20} />
+                                        <ShoppingCart size={18} />
                                     </button>
                                 </div>
                             </div>

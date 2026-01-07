@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Truck, ShieldCheck, HelpCircle, MapPin } from 'lucide-react';
 
 const TopBar = () => {
@@ -46,10 +46,14 @@ const TopBar = () => {
                         <HelpCircle size={14} />
                         <span>Aide</span>
                     </div>
-                    <div className="flex items-center space-x-1.5 cursor-pointer hover:opacity-80">
+                    <Link
+                        to="/profile"
+                        state={{ activeTab: 'orders' }}
+                        className="flex items-center space-x-1.5 cursor-pointer hover:opacity-80"
+                    >
                         <MapPin size={14} />
                         <span>Suivre ma commande</span>
-                    </div>
+                    </Link>
                 </div>
             </div>
         </div>

@@ -25,6 +25,10 @@ const userSchema = mongoose.Schema({
         type: String,
         default: '',
     },
+    coverPicture: {
+        type: String,
+        default: '',
+    },
     phone: {
         type: String,
         default: '',

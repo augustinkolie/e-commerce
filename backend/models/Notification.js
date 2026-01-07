@@ -9,7 +9,7 @@ const notificationSchema = mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ['REPLY'],
+        enum: ['REPLY', 'NEW_PRODUCT'],
         default: 'REPLY'
     },
     message: {
@@ -18,12 +18,12 @@ const notificationSchema = mongoose.Schema({
     },
     product: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: 'Product',
     },
     review: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: 'Review',
     },
     read: {

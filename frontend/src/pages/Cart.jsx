@@ -72,7 +72,7 @@ const Cart = () => {
                                         {item.name}
                                     </h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                        {item.price}€ / unité
+                                        {item.price.toLocaleString('fr-FR')} {item.currency || '€'} / unité
                                     </p>
 
                                     {/* Quantity Controls */}
@@ -104,7 +104,7 @@ const Cart = () => {
                                         <X size={20} />
                                     </button>
                                     <p className="text-2xl font-bold text-gray-800 dark:text-white">
-                                        {(item.price * item.quantity).toFixed(2)}€
+                                        {(item.price * item.quantity).toLocaleString('fr-FR')} {item.currency || '€'}
                                     </p>
                                 </div>
                             </div>

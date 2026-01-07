@@ -84,6 +84,34 @@ const products = [
         description: "Votre compagnon santé et bien-être au poignet. Suivi du sommeil, ECG et analyse de composition corporelle.",
         countInStock: 31
     },
+    {
+        name: "iPad Air M2",
+        image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
+        price: 699.99,
+        originalPrice: 749.99,
+        discount: "-7%",
+        rating: 5,
+        numReviews: 324,
+        category: "Électronique",
+        badge: "Nouveau",
+        badgeColor: "bg-green-500",
+        description: "L'iPad Air superpuissant avec la puce M2, un écran Liquid Retina de 11 pouces et une autonomie d'une journée entière.",
+        countInStock: 25
+    },
+    {
+        name: "Nintendo Switch OLED",
+        image: "/assets/app2.webp",
+        price: 349.99,
+        originalPrice: 389.99,
+        discount: "-10%",
+        rating: 5,
+        numReviews: 1543,
+        category: "Électronique",
+        badge: "Top",
+        badgeColor: "bg-orange-500",
+        description: "Profitez de vos jeux préférés où vous voulez avec l'écran OLED aux couleurs éclatantes et au contraste élevé.",
+        countInStock: 18
+    },
 
     // BEAUTÉ (6 produits)
     {

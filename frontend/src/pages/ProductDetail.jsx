@@ -164,9 +164,9 @@ const ProductDetail = () => {
                             {/* Price */}
                             <div className="bg-orange-50 dark:bg-orange-900/10 rounded-2xl p-6 mb-8">
                                 <div className="flex items-baseline gap-4">
-                                    <span className="text-3xl font-bold text-primary">{product.price}€</span>
+                                    <span className="text-3xl font-bold text-primary">{product.price.toLocaleString('fr-FR')} {product.currency || '€'}</span>
                                     {product.originalPrice && (
-                                        <span className="text-lg text-gray-400 line-through">{product.originalPrice}€</span>
+                                        <span className="text-lg text-gray-400 line-through">{product.originalPrice.toLocaleString('fr-FR')} {product.currency || '€'}</span>
                                     )}
                                 </div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
@@ -371,8 +371,10 @@ const ProductDetail = () => {
                                         <span className="text-xs text-gray-500 dark:text-gray-400">{p.rating} ({p.numReviews})</span>
                                     </div>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="text-lg font-bold text-primary">{p.price}€</span>
-                                        <span className="text-xs text-gray-400 line-through">{p.originalPrice}€</span>
+                                        <span className="text-lg font-bold text-primary">{p.price.toLocaleString('fr-FR')} {p.currency || '€'}</span>
+                                        {p.originalPrice && (
+                                            <span className="text-xs text-gray-400 line-through">{p.originalPrice.toLocaleString('fr-FR')} {p.currency || '€'}</span>
+                                        )}
                                     </div>
                                 </div>
                             </Link>

@@ -58,8 +58,7 @@ const ProductListScreen = () => {
     if (loading) return <div className="p-8 text-center">Chargement...</div>;
 
     return (
-        <div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Gestion des Produits</h1>
+        <div className="pt-2">
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -80,7 +79,9 @@ const ProductListScreen = () => {
                         </div>
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Valeur du Stock</p>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{totalValue.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                        {totalValue.toLocaleString('fr-FR')} {products[0]?.currency || '€'}
+                    </h3>
                 </div>
 
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -133,7 +134,9 @@ const ProductListScreen = () => {
                                 <tr key={product._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 font-mono">{product._id.substring(0, 10)}...</td>
                                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white max-w-xs truncate">{product.name}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{product.price}€</td>
+                                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                        {product.price.toLocaleString('fr-FR')} {product.currency || '€'}
+                                    </td>
                                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{product.category}</td>
                                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{product.brand}</td>
                                     <td className="px-6 py-4 text-sm flex items-center gap-2">

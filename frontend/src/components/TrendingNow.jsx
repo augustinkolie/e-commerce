@@ -53,7 +53,9 @@ const TrendingNow = ({ products = [] }) => {
 
                                 <div className="mt-auto pt-2">
                                     <div className="mb-1">
-                                        <span className="text-base font-bold text-gray-800 dark:text-white">{product.price}€</span>
+                                        <span className="text-base font-bold text-gray-800 dark:text-white">
+                                            {product.price.toLocaleString('fr-FR')} {product.currency || '€'}
+                                        </span>
                                     </div>
 
                                     <div className="flex items-center space-x-1 text-orange-500">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, ShoppingBag, Star, TrendingUp, Heart, MessageCircle, Loader2 } from 'lucide-react';
+import { Users, ShoppingBag, Star, TrendingUp, Heart, MessageCircle, Loader2, BarChart3 } from 'lucide-react';
 import api from '../../utils/api';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -7,6 +7,7 @@ import { fr } from 'date-fns/locale';
 const DashboardScreen = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchStats();
@@ -15,6 +16,7 @@ const DashboardScreen = () => {
     const fetchStats = async () => {
         try {
             setLoading(true);
+            setError(null);
             const { data } = await api.get('/dashboard/stats');
             console.log('Dashboard stats:', data); // Debug log
             setStats(data);
@@ -22,6 +24,7 @@ const DashboardScreen = () => {
         } catch (err) {
             console.error('Error fetching dashboard stats:', err);
             console.error('Error response:', err.response?.data);
+            setError(err.response?.data?.message || err.message || 'Erreur inconnue');
             setLoading(false);
         }
     };
@@ -34,17 +37,26 @@ const DashboardScreen = () => {
         );
     }
 
-    if (!stats) {
+    if (error || !stats) {
         return (
             <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">Impossible de charger les statistiques</p>
+                <BarChart3 className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Impossible de charger le tableau de bord</h3>
+                <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-sm mx-auto">
+                    {error || 'Aucune donnée disponible pour le moment.'}
+                </p>
+                <button
+                    onClick={fetchStats}
+                    className="mt-6 px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2 mx-auto"
+                >
+                    Réessayer
+                </button>
             </div>
         );
     }
 
     return (
-        <div>
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Tableau de bord</h1>
+        <div className="pt-2">
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

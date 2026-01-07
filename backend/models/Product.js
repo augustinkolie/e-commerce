@@ -32,6 +32,11 @@ const productSchema = mongoose.Schema({
         required: true,
         default: 0,
     },
+    currency: {
+        type: String,
+        required: false,
+        default: '€',
+    },
     countInStock: {
         type: Number,
         required: true,

@@ -92,8 +92,8 @@ const FlashDeals = ({ products = [], loading = false }) => {
                                 />
 
                                 {/* Badges - Adjusted positioning */}
-                                <div className="absolute top-4 left-4">
-                                    <span className="bg-primary text-white w-10 h-10 rounded-full font-bold text-xs flex items-center justify-center shadow-md border-2 border-white/20">
+                                <div className="absolute top-3 left-3">
+                                    <span className="bg-primary text-white w-8 h-8 rounded-full font-bold text-[10px] flex items-center justify-center shadow-md border-2 border-white/20">
                                         {product.discount}
                                     </span>
                                 </div>
@@ -125,37 +125,39 @@ const FlashDeals = ({ products = [], loading = false }) => {
                             </div>
 
                             {/* Info Container */}
-                            <div className="p-6 flex flex-col flex-grow">
-                                <h3 className={`text-base font-semibold mb-3 line-clamp-2 leading-snug transition-colors ${product.highlight ? 'text-primary' : 'text-gray-800 dark:text-white'}`}>
+                            <div className="p-4 flex flex-col flex-grow">
+                                <h3 className={`text-sm font-semibold mb-2 line-clamp-2 leading-tight transition-colors ${product.highlight ? 'text-primary' : 'text-gray-800 dark:text-white'}`}>
                                     {product.name}
                                 </h3>
 
-                                <div className="flex items-center space-x-2 mb-4">
+                                <div className="flex items-center space-x-2 mb-3">
                                     <div className="flex text-yellow-400">
                                         {[...Array(5)].map((_, i) => (
                                             <Star
                                                 key={i}
-                                                size={14}
+                                                size={12}
                                                 fill={i < product.rating ? "currentColor" : "none"}
                                                 className={i < product.rating ? "" : "text-gray-200"}
                                             />
                                         ))}
                                     </div>
-                                    <span className="text-xs text-gray-400 font-normal font-sans">({product.reviews})</span>
+                                    <span className="text-[10px] text-gray-400 font-normal font-sans">({product.reviews})</span>
                                 </div>
 
                                 <div className="mt-auto">
-                                    <div className="flex items-baseline space-x-3 mb-6">
-                                        <span className="text-2xl font-bold text-primary">{product.price}€</span>
-                                        <span className="text-base text-gray-300 line-through font-normal">{product.originalPrice}€</span>
+                                    <div className="flex items-baseline space-x-2 mb-4">
+                                        <span className="text-xl font-bold text-primary">{product.price.toLocaleString('fr-FR')} {product.currency || '€'}</span>
+                                        {product.originalPrice && (
+                                            <span className="text-sm text-gray-300 line-through font-normal">{product.originalPrice.toLocaleString('fr-FR')} {product.currency || '€'}</span>
+                                        )}
                                     </div>
 
                                     <button
                                         onClick={() => addToCart(product)}
-                                        className="w-full bg-primary text-white py-3 rounded-2xl font-semibold flex items-center justify-center space-x-2.5 hover:bg-orange-600 transition-all active:scale-95 shadow-lg shadow-primary/20 cursor-pointer"
+                                        className="w-full bg-primary text-white py-2.5 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:bg-orange-600 transition-all active:scale-95 shadow-lg shadow-primary/20 cursor-pointer text-sm"
                                     >
-                                        <ShoppingCart size={20} />
-                                        <span>Ajouter au panier</span>
+                                        <ShoppingCart size={18} />
+                                        <span>Ajouter</span>
                                     </button>
                                 </div>
                             </div>

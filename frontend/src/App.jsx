@@ -32,6 +32,10 @@ import ProductListScreen from './pages/admin/ProductListScreen';
 import ProductEditScreen from './pages/admin/ProductEditScreen';
 import DashboardScreen from './pages/admin/DashboardScreen';
 import OrderListScreen from './pages/admin/OrderListScreen';
+import ReviewListScreen from './pages/admin/ReviewListScreen';
+import StatisticsScreen from './pages/admin/StatisticsScreen';
+import StockScreen from './pages/admin/StockScreen';
+import SettingsScreen from './pages/admin/SettingsScreen';
 
 
 import { AuthProvider } from './context/AuthContext';
@@ -75,6 +79,10 @@ function App() {
                     <Route path="productlist" element={<ProductListScreen />} />
                     <Route path="product/:id/edit" element={<ProductEditScreen />} />
                     <Route path="orderlist" element={<OrderListScreen />} />
+                    <Route path="reviewlist" element={<ReviewListScreen />} />
+                    <Route path="statistics" element={<StatisticsScreen />} />
+                    <Route path="stock" element={<StockScreen />} />
+                    <Route path="settings" element={<SettingsScreen />} />
                   </Route>
                 </Route>
               </Routes>

@@ -46,23 +46,33 @@ router.post('/', protect, upload.single('image'), asyncHandler(async (req, res) 
         throw new Error('No file uploaded');
     }
 
-    console.log('FILE UPLOADED:', req.file.filename);
+    const uploadType = req.query.type || 'profile'; // Default to profile if not specified
+    console.log('FILE UPLOADED:', req.file.filename, 'TYPE:', uploadType);
+
     try {
         const imagePath = `/uploads/profiles/${req.file.filename}`;
 
-        console.log('UPDATING USER IN DB:', req.user._id, 'WITH PIX:', imagePath);
+        const updateData = {};
+        if (uploadType === 'cover') {
+            updateData.coverPicture = imagePath;
+        } else {
+            updateData.profilePicture = imagePath;
+        }
+
+        console.log('UPDATING USER IN DB:', req.user._id, 'WITH DATA:', updateData);
 
         const updatedUser = await User.findByIdAndUpdate(
             req.user._id,
-            { profilePicture: imagePath },
-            { new: true, runValidators: false } // runValidators: false to be safe during this specific update
+            updateData,
+            { new: true, runValidators: false }
         );
 
         if (updatedUser) {
             console.log('USER UPDATED SUCCESSFULLY:', updatedUser.email);
             res.json({
                 message: 'Image uploaded successfully',
-                profilePicture: imagePath,
+                profilePicture: updatedUser.profilePicture,
+                coverPicture: updatedUser.coverPicture,
             });
         } else {
             console.log('USER NOT FOUND DURING UPDATE');

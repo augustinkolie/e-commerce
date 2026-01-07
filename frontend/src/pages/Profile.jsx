@@ -4,20 +4,27 @@ import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
 import {
     User, Package, Heart, Settings, LogOut, Camera,
-    MapPin, CreditCard, Bell, ChevronRight, ShoppingBag
+    MapPin, CreditCard, Bell, ChevronRight, ShoppingBag, X
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 
 const Profile = () => {
     const { user, logout, updateUserInfo } = useAuth();
     const { cartItems } = useCart();
     const { favorites } = useFavorites();
-    const [activeTab, setActiveTab] = useState('dashboard');
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'dashboard');
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState(null);
     const [uploadSuccess, setUploadSuccess] = useState(false);
+    const [tempImage, setTempImage] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
+    const [tempCover, setTempCover] = useState(null);
+    const [coverFile, setCoverFile] = useState(null);
+    const [uploadingCover, setUploadingCover] = useState(false);
     const fileInputRef = useRef(null);
+    const coverInputRef = useRef(null);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
@@ -26,6 +33,13 @@ const Profile = () => {
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [saveError, setSaveError] = useState(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+    useEffect(() => {
+        if (location.state?.activeTab) {
+            setActiveTab(location.state.activeTab);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         if (user) {
@@ -61,12 +75,35 @@ const Profile = () => {
         }
     };
 
-    const handleImageUpload = async (e) => {
+    const handleImageSelect = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Validation simple: type image et taille max 2Mo
+        if (!file.type.startsWith('image/')) {
+            setUploadError('Veuillez sélectionner une image valide.');
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            setUploadError('L\'image doit faire moins de 2Mo.');
+            return;
+        }
+
+        setImageFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setTempImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+        setUploadError(null);
+        setUploadSuccess(false);
+    };
+
+    const handleSaveImage = async () => {
+        if (!imageFile) return;
+
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', imageFile);
 
         setUploading(true);
         setUploadError(null);
@@ -81,12 +118,78 @@ const Profile = () => {
 
             updateUserInfo({ profilePicture: data.profilePicture });
             setUploadSuccess(true);
+            setTempImage(null);
+            setImageFile(null);
             setTimeout(() => setUploadSuccess(false), 3000);
         } catch (err) {
-            setUploadError(err.response?.data?.message || err.message || 'Error uploading image');
+            setUploadError(err.response?.data?.message || err.message || 'Erreur lors du téléchargement');
         } finally {
             setUploading(false);
         }
+    };
+
+    const handleCancelImage = () => {
+        setTempImage(null);
+        setImageFile(null);
+        setUploadError(null);
+    };
+
+    const handleCoverSelect = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setUploadError('Veuillez sélectionner une image valide pour la couverture.');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            setUploadError('L\'image de couverture doit faire moins de 5Mo.');
+            return;
+        }
+
+        setCoverFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setTempCover(reader.result);
+        };
+        reader.readAsDataURL(file);
+        setUploadError(null);
+        setUploadSuccess(false);
+    };
+
+    const handleSaveCover = async () => {
+        if (!coverFile) return;
+
+        const formData = new FormData();
+        formData.append('image', coverFile);
+
+        setUploadingCover(true);
+        setUploadError(null);
+        setUploadSuccess(false);
+
+        try {
+            const { data } = await api.post('/upload?type=cover', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            updateUserInfo({ coverPicture: data.coverPicture });
+            setUploadSuccess(true);
+            setTempCover(null);
+            setCoverFile(null);
+            setTimeout(() => setUploadSuccess(false), 3000);
+        } catch (err) {
+            setUploadError(err.response?.data?.message || err.message || 'Erreur lors du téléchargement de la couverture');
+        } finally {
+            setUploadingCover(false);
+        }
+    };
+
+    const handleCancelCover = () => {
+        setTempCover(null);
+        setCoverFile(null);
+        setUploadError(null);
     };
 
     if (!user) {
@@ -122,44 +225,156 @@ const Profile = () => {
             case 'dashboard':
                 return (
                     <div className="space-y-6 animate-in fade-in duration-500">
-                        {/* Hero / Welcome */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center gap-6">
-                            <div className="relative group">
-                                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-3xl font-bold border-4 border-white dark:border-gray-700 shadow-md overflow-hidden">
-                                    {user.profilePicture ? (
-                                        <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                        {/* LinkedIn Style Header */}
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative group/header">
+                            {/* Banner Area */}
+                            <div className="h-32 md:h-48 bg-gray-200 dark:bg-gray-700 relative overflow-hidden group/banner">
+                                {tempCover ? (
+                                    <img src={tempCover} alt="Aperçu couverture" className="w-full h-full object-cover animate-in fade-in duration-300" />
+                                ) : user.coverPicture ? (
+                                    <img src={user.coverPicture} alt="Couverture" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-r from-orange-400 to-primary">
+                                        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/5"></div>
+
+                                {/* Cover Actions */}
+                                <div className="absolute top-4 right-4 flex gap-2">
+                                    {tempCover && !uploadingCover ? (
+                                        <div className="flex gap-2 animate-in slide-in-from-right-2 duration-300">
+                                            <button
+                                                onClick={handleSaveCover}
+                                                className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg shadow-lg transition-all flex items-center gap-2 text-xs font-bold cursor-pointer"
+                                            >
+                                                Sauvegarder
+                                            </button>
+                                            <button
+                                                onClick={handleCancelCover}
+                                                className="bg-white/90 hover:bg-white text-gray-700 p-2 rounded-lg shadow-lg transition-all flex items-center gap-2 text-xs font-bold cursor-pointer"
+                                            >
+                                                Annuler
+                                            </button>
+                                        </div>
                                     ) : (
-                                        user.name.charAt(0).toUpperCase()
+                                        <button
+                                            onClick={() => coverInputRef.current.click()}
+                                            className="bg-white/20 hover:bg-white/40 backdrop-blur-md text-white p-2 rounded-full shadow-lg transition-all cursor-pointer opacity-0 group-hover/banner:opacity-100"
+                                            title="Changer la bannière"
+                                        >
+                                            <Camera size={18} />
+                                        </button>
                                     )}
                                 </div>
                                 <input
                                     type="file"
-                                    ref={fileInputRef}
-                                    onChange={handleImageUpload}
+                                    ref={coverInputRef}
+                                    onChange={handleCoverSelect}
                                     className="hidden"
                                     accept="image/*"
                                 />
-                                <button
-                                    onClick={() => fileInputRef.current.click()}
-                                    disabled={uploading}
-                                    className={`absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-gray-700 rounded-full shadow-lg border border-gray-100 dark:border-gray-600 flex items-center justify-center text-gray-500 hover:text-primary transition-colors cursor-pointer group-hover:scale-110 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    <Camera size={14} />
-                                </button>
                             </div>
-                            <div className="text-center md:text-left flex-1">
-                                {uploadError && <p className="text-red-500 text-xs mb-2">{uploadError}</p>}
-                                {uploadSuccess && <p className="text-green-500 text-xs mb-2">Image mise à jour !</p>}
-                                {uploading && <p className="text-primary text-xs mb-2 animate-pulse">Téléchargement...</p>}
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Bonjour, {user.name} !</h2>
-                                <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">{user.email}</p>
-                                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                                    <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-semibold rounded-full">
-                                        Membre Premium
-                                    </span>
-                                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-full">
-                                        Vérifié
-                                    </span>
+
+                            {/* Profile Content */}
+                            <div className="px-6 pb-6 pt-0 flex flex-col items-start relative">
+                                {/* Overlapping Avatar */}
+                                <div className="flex flex-col items-center gap-3 -mt-16 md:-mt-24 ml-0 md:ml-6 relative z-10">
+                                    <div className="relative group/avatar">
+                                        <div
+                                            onClick={() => setIsPreviewOpen(true)}
+                                            className="w-32 h-32 md:w-44 md:h-44 rounded-full bg-white dark:bg-gray-800 p-1 shadow-xl cursor-zoom-in group-hover/avatar:brightness-95 transition-all border-4 border-white dark:border-gray-800"
+                                        >
+                                            <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-primary/10 text-primary text-4xl font-bold">
+                                                {tempImage ? (
+                                                    <img src={tempImage} alt="Aperçu" className="w-full h-full object-cover" />
+                                                ) : user.profilePicture ? (
+                                                    <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    user.name.charAt(0).toUpperCase()
+                                                )}
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleImageSelect}
+                                            className="hidden"
+                                            accept="image/*"
+                                        />
+                                        {!tempImage && (
+                                            <button
+                                                onClick={() => fileInputRef.current.click()}
+                                                className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-8 h-8 md:w-10 md:h-10 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-primary transition-all cursor-pointer hover:scale-110 z-20"
+                                                title="Modifier la photo"
+                                            >
+                                                <Camera size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Action Buttons for Selection */}
+                                    {tempImage && !uploading && (
+                                        <div className="flex gap-2 animate-in slide-in-from-top-2 duration-300">
+                                            <button
+                                                onClick={handleSaveImage}
+                                                className="px-4 py-1.5 bg-green-500 text-white text-xs font-bold rounded-full hover:bg-green-600 transition-colors cursor-pointer shadow-md"
+                                            >
+                                                Sauvegarder
+                                            </button>
+                                            <button
+                                                onClick={handleCancelImage}
+                                                className="px-4 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer shadow-sm"
+                                            >
+                                                Annuler
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* User info & Badges Section */}
+                                <div className="mt-4 md:mt-2 w-full flex flex-col md:flex-row md:items-end justify-between gap-4 pl-0 md:pl-4">
+                                    <div className="flex-1">
+                                        {(uploadError) && <p className="text-red-500 text-xs font-medium mb-1">{uploadError}</p>}
+                                        {uploadSuccess && <p className="text-green-500 text-xs font-medium mb-1">Mise à jour réussie !</p>}
+                                        {uploading && <p className="text-primary text-xs font-medium mb-1 animate-pulse">Enregistrement de la photo de profil...</p>}
+                                        {uploadingCover && <p className="text-primary text-xs font-medium mb-1 animate-pulse">Enregistrement de la bannière...</p>}
+
+                                        <div className="flex flex-col">
+                                            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
+                                                {user.name}
+                                            </h2>
+                                            <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base font-medium">
+                                                {user.email}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-2.5 mt-4">
+                                            <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-bold rounded-full border border-orange-200 dark:border-orange-800/30 flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+                                                Membre Premium
+                                            </span>
+                                            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold rounded-full border border-blue-200 dark:border-blue-800/30">
+                                                Vérifié
+                                            </span>
+                                            <button
+                                                onClick={() => fileInputRef.current.click()}
+                                                className="px-3 py-1 bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold rounded-full transition-all cursor-pointer flex items-center gap-1.5"
+                                            >
+                                                Modifier la photo
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="hidden md:flex flex-col items-end text-right">
+                                        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+                                            <MapPin size={14} />
+                                            <span>Conakry, Guinée</span>
+                                        </div>
+                                        <div className="text-xs text-gray-400">
+                                            Membre depuis {new Date(user.createdAt).getFullYear()}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -455,6 +670,35 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Image Preview Modal */}
+            {isPreviewOpen && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300"
+                    onClick={() => setIsPreviewOpen(false)}
+                >
+                    <button
+                        className="absolute top-6 right-6 text-white hover:text-primary transition-colors cursor-pointer p-2 bg-white/10 rounded-full"
+                        onClick={() => setIsPreviewOpen(false)}
+                    >
+                        <X size={24} />
+                    </button>
+                    <div
+                        className="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {tempImage ? (
+                            <img src={tempImage} alt="Zoom" className="w-full h-full object-contain" />
+                        ) : user.profilePicture ? (
+                            <img src={user.profilePicture} alt={user.name} className="w-full h-full object-contain" />
+                        ) : (
+                            <div className="w-64 h-64 bg-primary/20 flex items-center justify-center text-primary text-6xl font-bold">
+                                {user.name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

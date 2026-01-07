@@ -44,6 +44,8 @@ const deleteProduct = asyncHandler(async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
+    const currentCurrency = (await Product.findOne().select('currency'))?.currency || '€';
+
     const product = new Product({
         name: 'Sample name',
         price: 0,
@@ -54,6 +56,7 @@ const createProduct = asyncHandler(async (req, res) => {
         countInStock: 0,
         numReviews: 0,
         description: 'Sample description',
+        currency: currentCurrency,
     });
 
     const createdProduct = await product.save();
@@ -72,11 +75,21 @@ const updateProduct = asyncHandler(async (req, res) => {
         brand,
         category,
         countInStock,
+        currency,
     } = req.body;
 
     const product = await Product.findById(req.params.id);
 
     if (product) {
+        const EXCHANGE_RATES = {
+            'GNF': 9300,
+            '$': 1.08,
+            '€': 1,
+            'Fonctionnel': 1
+        };
+
+        const oldCurrency = product.currency || '€';
+
         product.name = name;
         product.price = price;
         product.description = description;
@@ -84,8 +97,43 @@ const updateProduct = asyncHandler(async (req, res) => {
         product.brand = brand;
         product.category = category;
         product.countInStock = countInStock;
+        product.currency = currency;
 
         const updatedProduct = await product.save();
+        console.log(`Product updated: ${updatedProduct.name}, New Currency: ${currency}, Old Currency: ${oldCurrency}`);
+
+        // Update all products to use the same currency and convert their prices
+        if (currency && currency !== oldCurrency) {
+            const conversionFactor = EXCHANGE_RATES[currency] / EXCHANGE_RATES[oldCurrency];
+            console.log(`Global update triggered. Factor: ${conversionFactor}`);
+
+            try {
+                // Using aggregation pipeline in updateMany for field-based calculations
+                const result = await Product.updateMany({ _id: { $ne: product._id } }, [
+                    {
+                        $set: {
+                            currency: currency,
+                            price: { $round: [{ $multiply: ["$price", conversionFactor] }, 2] }
+                        }
+                    }
+                ]);
+                console.log(`Global update result:`, result);
+            } catch (err) {
+                console.error("Global update failed via pipeline, trying fallback:", err);
+                // Fallback: Fetch and update for compatibility with older MongoDB
+                const productsToUpdate = await Product.find({ _id: { $ne: product._id } });
+                for (let p of productsToUpdate) {
+                    p.currency = currency;
+                    p.price = Number((p.price * conversionFactor).toFixed(2));
+                    await p.save();
+                }
+                console.log(`Fallback global update finished.`);
+            }
+        } else if (currency) {
+            console.log(`Currencies match (${currency}), just ensuring sync...`);
+            await Product.updateMany({ _id: { $ne: product._id } }, { currency: currency });
+        }
+
         res.json(updatedProduct);
     } else {
         res.status(404);
@@ -260,6 +308,51 @@ const likeProductReviewReply = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Get all reviews
+// @route   GET /api/products/reviews
+// @access  Private/Admin
+const getAllReviews = asyncHandler(async (req, res) => {
+    const reviews = await Review.find({})
+        .populate('user', 'name email')
+        .populate('product', 'name image')
+        .sort({ createdAt: -1 });
+    res.json(reviews);
+});
+
+// @desc    Delete a review
+// @route   DELETE /api/products/reviews/:id
+// @access  Private/Admin
+const deleteReview = asyncHandler(async (req, res) => {
+    const review = await Review.findById(req.params.id);
+
+    if (review) {
+        // Update product statistics before deleting
+        const product = await Product.findById(review.product);
+        if (product) {
+            await Review.deleteOne({ _id: review._id });
+
+            const remainingReviews = await Review.find({ product: product._id });
+            product.numReviews = remainingReviews.length;
+
+            if (remainingReviews.length > 0) {
+                const totalRating = remainingReviews.reduce((acc, item) => (item.rating || 0) + acc, 0);
+                product.rating = totalRating / remainingReviews.length;
+            } else {
+                product.rating = 0;
+            }
+
+            await product.save();
+        } else {
+            await Review.deleteOne({ _id: review._id });
+        }
+
+        res.json({ message: 'Commentaire supprimé' });
+    } else {
+        res.status(404);
+        throw new Error('Commentaire non trouvé');
+    }
+});
+
 module.exports = {
     getProducts,
     getProductById,
@@ -271,4 +364,6 @@ module.exports = {
     likeProductReview,
     replyToProductReview,
     likeProductReviewReply,
+    getAllReviews,
+    deleteReview,
 };
